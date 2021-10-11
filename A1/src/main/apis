@@ -1,0 +1,7 @@
+https://app.swaggerhub.com/apis/cloud-perf/SkiDataAPI/1.0.2#/resorts/getResortSeasons
+
+1. get /resorts
+get a list of ski resorts in the database
+
+2. get /resorts
+get
