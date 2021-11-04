@@ -1,6 +1,7 @@
 package client2;
 
-import client1.Counter;
+import info.InfoPackage;
+import util.Counter;
 import java.net.http.HttpClient;
 import java.net.http.HttpClient.Version;
 import java.time.Duration;

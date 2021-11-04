@@ -1,4 +1,4 @@
-package client2;
+package info;
 
 public class InfoPackage {
   private final long start;

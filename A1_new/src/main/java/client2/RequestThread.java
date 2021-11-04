@@ -1,9 +1,10 @@
 package client2;
 
-import client1.Counter;
-import client1.RandomNumGenerator;
-import client1.RangeGenerator;
-import client1.LiftRide;
+import info.InfoPackage;
+import util.Counter;
+import util.RandomNumGenerator;
+import util.RangeGenerator;
+import info.LiftRide;
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;

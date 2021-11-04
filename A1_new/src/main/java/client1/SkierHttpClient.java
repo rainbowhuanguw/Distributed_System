@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 import java.util.concurrent.CountDownLatch;
+import util.Counter;
 
 /**
  * Client with information about number of success and failure, throughput, etc.

@@ -1,4 +1,4 @@
-package client1;
+package util;
 
 /**
  * Generates a number range given the batch size and thread id

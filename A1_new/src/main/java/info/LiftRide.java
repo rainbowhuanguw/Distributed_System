@@ -1,4 +1,4 @@
-package client1;
+package info;
 
 /**
  * client1.Response object to be constructed given the post request body

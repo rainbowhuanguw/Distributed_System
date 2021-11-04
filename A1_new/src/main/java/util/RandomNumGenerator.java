@@ -1,4 +1,4 @@
-package client1;
+package util;
 
 import java.security.SecureRandom;
 
