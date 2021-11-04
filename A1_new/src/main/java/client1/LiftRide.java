@@ -3,13 +3,19 @@ package client1;
 /**
  * client1.Response object to be constructed given the post request body
  */
-public class Response {
+public class LiftRide {
+  private final int skierId;
   private final int liftId;
   private final int time;
 
-  public Response(int liftId, int time) {
+  public LiftRide(int skierId, int liftId, int time) {
+    this.skierId = skierId;
     this.liftId = liftId;
     this.time = time;
+  }
+
+  public int getSkierId() {
+    return skierId;
   }
 
   public int getLiftId() {
@@ -20,11 +26,16 @@ public class Response {
     return time;
   }
 
-  @Override
-  public String toString() {
+  public String toJsonString() {
     return "{" +
+        "\"skierId\":" + skierId +
         "\"liftId\":" + liftId +
         ", \"time\": " + time +
         '}';
+  }
+
+  @Override
+  public String toString() {
+    return skierId + "," + liftId + "," + time;
   }
 }

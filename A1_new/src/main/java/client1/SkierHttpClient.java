@@ -9,13 +9,14 @@ import java.util.Scanner;
 import java.util.concurrent.CountDownLatch;
 
 /**
- * Client
+ * Client with information about number of success and failure, throughput, etc.
+ * Saves liftRide information to RabbitMQ
  */
 public class SkierHttpClient {
   private static final int MIN = 0;
   private static final int MIN_THREAD = 1;
   private static final int MAX_THREAD = 256;
-  private static final int MAX_SKIER= 100000;
+  private static final int MAX_SKIER = 100000;
   private static final int DEFAULT_LIFT = 40;
   private static final int MIN_LIFT = 5;
   private static final int MAX_LIFT = 60;
@@ -25,7 +26,6 @@ public class SkierHttpClient {
   private static final double STARTUP_FACTOR = 0.2;
   private static final double PEAK_FACTOR = 0.6;
   private static final double COOLDOWN_FACTOR = 0.1;
-  private static final double NUM_PHASE = 3;
   private static final double RUN_FACTOR = 0.1; // factor to start another phase
   private static final String SKIP_COMMAND = "NULL";
   private static final int TIME_OUT_LIMIT = 200000;
@@ -64,7 +64,7 @@ public class SkierHttpClient {
     Thread[] tids = new Thread[numThreads];
 
     // calculate number of posts
-    int numPosts = 0;
+    int numPosts;
     if (factor == STARTUP_FACTOR || factor == PEAK_FACTOR)
       numPosts = (int) (factor * numRuns * numSkiers / numThreads);
     else numPosts = (int) factor * numRuns;
@@ -72,7 +72,7 @@ public class SkierHttpClient {
     // create numThreads threads
     for (int i = 0; i < numThreads; i++) {
       // create and start threads
-      Thread thread = new MyThread(i, numLifts, numThreads, numSkiers, numPosts,
+      Thread thread = new RequestThread(i, numLifts, numThreads, numSkiers, numPosts,
           httpClient, failureCounter);
       tids[i] = thread; // store in the array to check for liveliness within this phase
       allThreads.add(thread); // store in the list to shared across three phases

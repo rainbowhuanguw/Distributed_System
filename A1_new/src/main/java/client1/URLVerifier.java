@@ -19,8 +19,6 @@ public class URLVerifier {
    * valid format: {resortID}/seasons/{seasonID}/days/{dayID}/skiers/{skierID}
    * // url parts : [, resortID, seasons, seasonID, days, dayId, skiers, skierID]
    * // example url : http://localhost:8080/A1_war_exploded/skiers/r1/seasons1/s1/days/d1/skiers/123
-   * @param urlParts
-   * @return
    */
   public static boolean isValidSkierUrl(String[] urlParts) {
     if (urlParts.length < URL_LEN) return false;
