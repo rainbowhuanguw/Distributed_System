@@ -12,12 +12,12 @@ import java.util.concurrent.ConcurrentHashMap;
  * lift rides for each skier in the hash map
  */
 public class Consumer {
-  private static final String HOST_NAME = "18.212.33.225"; // public rabbitmq address
+  private static final String HOST_NAME = "52.201.226.244"; // public rabbitmq address
   //private static final String HOST_NAME = "localhost";
   private static final int PORT_NUMBER = 5672;
   private static final String USER_NAME = "rainbow";
   private static final String PASSWORD = "123456";
-  private static final int NUM_THREADS = 16;
+  private static final int NUM_THREADS = 2;
 
   private static ConnectionFactory factory = null;
   private static Connection connection = null; // threads share one connection

@@ -18,7 +18,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  */
 public class ProducerThread extends Thread {
   private static final String PREFIX = "http://"
-      + "3.89.20.1:8080/A2_war" +            // for ec2
+      + "18.234.189.1:8080/A2_war" +            // for ec2
       // + "localhost:8080/A2_war_exploded" +   // for local
       "/skiers/resort1/seasons/season1/days/day1/skiers/";
 

@@ -7,9 +7,6 @@ import info.LiftRide;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeoutException;
-import org.apache.commons.pool2.ObjectPool;
-import org.apache.commons.pool2.impl.GenericObjectPool;
-import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 
 /**
  * Sends a lift ride log generated in the doPost process to the rabbitmq to be consume later
@@ -25,8 +22,6 @@ public class Sender {
 
   private static ConnectionFactory factory = null;
   private static Connection connection = null;
-  private static ObjectPool<Channel> channelObjectPool = null;
-  private static final int POOL_SIZE = 50;
 
   private static void setup() throws IOException, TimeoutException {
     if (factory == null) {
@@ -41,21 +36,12 @@ public class Sender {
     if (connection == null) {
       connection = factory.newConnection();
     }
-
-    /*
-    if (channelObjectPool == null) {
-      GenericObjectPoolConfig config = new GenericObjectPoolConfig();
-      config.setMaxTotal(POOL_SIZE);
-      channelObjectPool = new GenericObjectPool<Channel>(config);
-    }
-     */
   }
 
   public static void sendAMessage(LiftRide input) throws Exception {
     // construct a connection if first time connect
     setup();
 
-    // open a new channel, use try to automatically close channel
     try (Channel channel = connection.createChannel()) {
       // create a channel after connection is established
       // sends one message once
@@ -69,10 +55,5 @@ public class Sender {
 
       System.out.println(" [x] Sent '" + message + "'");
     }
-  }
-
-  public static void main(String[] args) throws Exception {
-    LiftRide ride = new LiftRide(1, 2, 3);
-    Sender.sendAMessage(ride);
   }
 }
