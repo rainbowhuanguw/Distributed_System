@@ -13,13 +13,14 @@ import util.RangeGenerator;
 /**
  * Custom thread class
  */
-public class RequestThread extends Thread {
-  // private static final String PREFIX = "http://34.207.159.157:8080/A1_new_war/skiers/" +
-  private static final String PREFIX = "http://localhost:8080/A1_new_war_exploded/skiers/" +
-      "resort1/seasons/season1/days/day1/skiers/";
+public class ProducerThread extends Thread {
+
+  private static final String PREFIX = "http://"
+      + "3.89.20.1:8080/A2_war" +            // for ec2
+      // + "localhost:8080/A2_war_exploded" +   // for local
+      "/skiers/resort1/seasons/season1/days/day1/skiers/";
 
   private static final int SUCCESS = 200;
-
   private final int skierIdStart;
   private final int skierIdEnd;
   private final int numPosts;
@@ -30,7 +31,7 @@ public class RequestThread extends Thread {
   private final HttpClient client;
   private final Counter failureCounter;
 
-  public RequestThread(int threadId, int numLifts, int numThreads, int numSkiers,
+  public ProducerThread(int threadId, int numLifts, int numThreads, int numSkiers,
       int numPosts, HttpClient client, Counter failureCounter) {
     // calculate skier id range
     int[] idRange = RangeGenerator.getSkierIdRange(numSkiers/numThreads, threadId);
@@ -56,19 +57,25 @@ public class RequestThread extends Thread {
       int liftId = RandomNumGenerator.generateNum(1, numLifts);
 
       // send one post request
-      sendPostRequest(skierId, timeValue, liftId);
+      try {
+        sendPostRequest(skierId, timeValue, liftId);
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
     }
   }
 
   /**
    * Sends out one post request to the server
    */
-  public void sendPostRequest(int skierId, int timeValue, int liftId) {
+  public void sendPostRequest(int skierId, int timeValue, int liftId) throws Exception {
     // create a response object
-    LiftRide res = new LiftRide(skierId, liftId, timeValue);
+    LiftRide liftRide = new LiftRide(skierId, liftId, timeValue);
+
+    // send http request
     HttpRequest request = HttpRequest.newBuilder()
         // turn time and lift id as request body, then convert into json
-        .POST(HttpRequest.BodyPublishers.ofString(res.toString()))
+        .POST(HttpRequest.BodyPublishers.ofString(liftRide.toJsonString()))
         .uri(URI.create(PREFIX + skierId)) // put skier id into url
         .setHeader("Client", "skier:" + skierId) // add request header
         .build();
@@ -77,6 +84,7 @@ public class RequestThread extends Thread {
     try {
       response = client.send(request, HttpResponse.BodyHandlers.ofString());
     } catch (IOException | InterruptedException e) {
+      //this.failureCounter.increment();
       e.printStackTrace();
     }
 

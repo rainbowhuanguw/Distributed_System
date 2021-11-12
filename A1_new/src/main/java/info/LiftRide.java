@@ -28,7 +28,6 @@ public class LiftRide {
 
   public String toJsonString() {
     return "{" +
-        "\"skierId\":" + skierId +
         "\"liftId\":" + liftId +
         ", \"time\": " + time +
         '}';

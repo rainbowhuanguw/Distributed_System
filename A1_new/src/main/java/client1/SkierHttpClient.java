@@ -73,7 +73,7 @@ public class SkierHttpClient {
     // create numThreads threads
     for (int i = 0; i < numThreads; i++) {
       // create and start threads
-      Thread thread = new RequestThread(i, numLifts, numThreads, numSkiers, numPosts,
+      Thread thread = new ProducerThread(i, numLifts, numThreads, numSkiers, numPosts,
           httpClient, failureCounter);
       tids[i] = thread; // store in the array to check for liveliness within this phase
       allThreads.add(thread); // store in the list to shared across three phases
@@ -104,22 +104,22 @@ public class SkierHttpClient {
 
   public static void main(String[] args) throws Exception {
     // accept number of threads
-    System.out.print("Please enter number of threads to run:");
+    System.out.print("Number of threads to run:");
     int numThreads = validate(scanner.nextInt(), MIN_THREAD, MAX_THREAD);
 
     // accept number of skiers
-    System.out.print("Please enter number of skiers:");
+    System.out.print("Number of skiers:");
     int numSkiers = validate(scanner.nextInt(), MIN, MAX_SKIER);
 
     // accept number of ski lifts
-    System.out.print("Please enter number of ski lifts, enter NULL to use default value (" +
+    System.out.print("Number of ski lifts, enter NULL to use default value (" +
         DEFAULT_LIFT + "): ");
     String liftString = scanner.next();
     int numLifts = liftString.equalsIgnoreCase(SKIP_COMMAND) ? DEFAULT_LIFT :
         validate(Integer.parseInt(liftString), MIN_LIFT, MAX_LIFT);
 
     // accept mean number of ski lifts
-    System.out.print("Please enter number of ski lifts each skier rides each day,"
+    System.out.print("Number of ski lifts each skier rides each day,"
         + " enter NULL to use default value (" + DEFAULT_RUN + "): ");
     String runString = scanner.next();
     int numRuns = runString.equalsIgnoreCase(SKIP_COMMAND) ? DEFAULT_RUN :

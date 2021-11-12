@@ -1,13 +1,9 @@
 package consumer;
 
-import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
-import com.rabbitmq.client.DefaultConsumer;
 import com.rabbitmq.client.DeliverCallback;
-import com.rabbitmq.client.Envelope;
 import info.LiftRide;
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -44,7 +40,7 @@ public class ConsumerThread extends Thread {
     // gets callback/messages from queue
     DeliverCallback deliverCallback = (consumerTag, deliver) -> {
       String message = new String(deliver.getBody(), StandardCharsets.UTF_8);
-      System.out.println("[x] Received '" + message + "'");
+      //System.out.println("[x] Received '" + message + "'");
 
       // parse the message into key and values in map
       String[] split = message.split(",");
@@ -54,17 +50,7 @@ public class ConsumerThread extends Thread {
       skierToRides.get(skierId).add(new LiftRide(skierId, liftId, time));
     };
 
-    // consumes a message from the queue, do not auto ack
-    channel.basicConsume(REQUEST_QUEUE_NAME, false, "tag",
-        new DefaultConsumer(channel) {
-          @Override
-          public void handleDelivery(String consumerTag, Envelope envelope,
-              AMQP.BasicProperties properties, byte[] body) throws IOException {
-            long deliveryTag = envelope.getDeliveryTag();
-            // positively acknowledge a single delivery, the message will
-            // be discarded
-            channel.basicAck(deliveryTag, false);
-          }
-        });
+    // auto ack
+    channel.basicConsume(REQUEST_QUEUE_NAME, true, deliverCallback, consumerTag -> { });
   }
 }

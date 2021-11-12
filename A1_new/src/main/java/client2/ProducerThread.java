@@ -16,10 +16,11 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 /**
  * Custom thread class
  */
-public class RequestThread extends Thread {
-  private static final String PREFIX = "http://34.207.159.157:8080/A1_new_war/skiers/"
-  //private static final String PREFIX = "http://localhost:8080/A1_new_war_exploded/skiers/"
-      + "resort1/seasons/season1/days/day1/skiers/";
+public class ProducerThread extends Thread {
+  private static final String PREFIX = "http://"
+      + "3.89.20.1:8080/A2_war" +            // for ec2
+      // + "localhost:8080/A2_war_exploded" +   // for local
+      "/skiers/resort1/seasons/season1/days/day1/skiers/";
 
   private static final int SUCCESS = 200;
   private static final String POST = "POST";
@@ -38,7 +39,7 @@ public class RequestThread extends Thread {
 
   private final ConcurrentLinkedQueue<InfoPackage> infoQueue;
 
-  public RequestThread(int threadId,  int numLifts, int numThreads, int numSkiers,
+  public ProducerThread(int threadId,  int numLifts, int numThreads, int numSkiers,
       int numPosts, HttpClient client, Counter failureCounter,
       ConcurrentLinkedQueue<InfoPackage> infoQueue) {
     // calculate skier id range
@@ -80,7 +81,7 @@ public class RequestThread extends Thread {
 
     HttpRequest request = HttpRequest.newBuilder()
         // turn time and lift id as request body, then convert into json
-        .POST(HttpRequest.BodyPublishers.ofString(res.toString()))
+        .POST(HttpRequest.BodyPublishers.ofString(res.toJsonString()))
         .uri(URI.create(PREFIX + skierId)) // put skier id into url
         .setHeader("Client", "skier:" + skierId) // add request header
         .version(Version.HTTP_1_1)

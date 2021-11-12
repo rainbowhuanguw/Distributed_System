@@ -7,6 +7,9 @@
   <groupId>org.example</groupId>
   <artifactId>A1</artifactId>
   <version>1.0-SNAPSHOT</version>
+  <!--packing info as .jar-->
+  <packaging>jar</packaging>
+
   <build>
     <plugins>
       <plugin>
@@ -17,6 +20,33 @@
           <target>11</target>
         </configuration>
       </plugin>
+
+      <!-- maven dependencies for packing .jar start-->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+            <configuration>
+              <archive>
+                <manifest>
+                  <mainClass>
+                    consumer.Consumer
+                  </mainClass>
+                </manifest>
+              </archive>
+              <descriptorRefs>
+                <descriptorRef>jar-with-dependencies</descriptorRef>
+              </descriptorRefs>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <!-- maven dependencies for packing .jar end-->
     </plugins>
   </build>
 
@@ -25,15 +55,62 @@
     <maven.compiler.target>11</maven.compiler.target>
   </properties>
 
+
   <dependencies>
-    <!-- https://mvnrepository.com/artifact/javax.servlet/javax.servlet-api -->
+
+    <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-pool2 -->
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-pool2</artifactId>
+      <version>2.11.1</version>
+    </dependency>
+
+    <!-- servlet dependencies -->
+    <dependency>
+      <groupId>com.google.code.gson</groupId>
+      <artifactId>gson</artifactId>
+      <version>2.8.6</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>javax.servlet-api</artifactId>
+      <version>4.0.1</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>javax.xml.bind</groupId>
+      <artifactId>jaxb-api</artifactId>
+      <version>2.2.11</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.sun.xml.bind</groupId>
+      <artifactId>jaxb-core</artifactId>
+      <version>2.2.11</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.sun.xml.bind</groupId>
+      <artifactId>jaxb-impl</artifactId>
+      <version>2.2.11</version>
+    </dependency>
+
+    <dependency>
+      <groupId>javax.activation</groupId>
+      <artifactId>activation</artifactId>
+      <version>1.1.1</version>
+    </dependency>
+
     <dependency>
       <groupId>javax.annotation</groupId>
       <artifactId>javax.annotation-api</artifactId>
       <version>1.3.2</version>
     </dependency>
 
-    <!-- rabbitMQ dependencies -->
+    <!-- rabbitMQ dependencies start-->
     <dependency>
       <groupId>com.rabbitmq</groupId>
       <artifactId>amqp-client</artifactId>
@@ -45,17 +122,28 @@
       <artifactId>slf4j-api</artifactId>
       <version>1.7.5</version>
     </dependency>
+
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-simple</artifactId>
       <version>1.7.5</version>
     </dependency>
+    <!-- rabbitMQ dependencies end -->
 
     <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-lang3</artifactId>
       <version>3.12.0</version>
     </dependency>
+
+    <!-- dependencies for plugins start -->
+    <dependency>
+      <groupId>org.apache.maven.plugins</groupId>
+      <artifactId>maven-assembly-plugin</artifactId>
+      <version>3.3.0</version>
+      <type>maven-plugin</type>
+    </dependency>
+    <!-- dependencies for plugins end -->
 
   </dependencies>
 

@@ -19,7 +19,7 @@ import java.util.concurrent.CountDownLatch;
 public class SkierHttpClient {
   private static final int MIN = 0;
   private static final int MIN_THREAD = 1;
-  private static final int MAX_THREAD = 256;
+  private static final int MAX_THREAD = 512;
   private static final int MAX_SKIER = 100000;
   private static final int DEFAULT_LIFT = 40;
   private static final int MIN_LIFT = 5;
@@ -76,7 +76,7 @@ public class SkierHttpClient {
     // create numThreads threads
     for (int i = 0; i < numThreads; i++) {
       // create and start threads
-      Thread thread = new RequestThread(i, numLifts, numThreads, numSkiers, numPosts,
+      Thread thread = new ProducerThread(i, numLifts, numThreads, numSkiers, numPosts,
           httpClient, failureCounter, infoQueue);
       tids[i] = thread; // store in the array to check for liveliness within this phase
       allThreads.add(thread); // store in the list to shared across three phases
