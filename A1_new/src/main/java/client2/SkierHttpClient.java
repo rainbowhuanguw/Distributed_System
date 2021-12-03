@@ -167,7 +167,7 @@ public class SkierHttpClient {
     long averageLatency = sumLatency / totalRequests;
 
     Collections.sort(latencies);
-    long medianLatency = latencies.get(latencies.size()/2);
+    long medianLatency = latencies.get(latencies.size() / 2);
     long p99Latency = latencies.get((int) Math.round(latencies.size() * 0.99));
 
     System.out.println("**************************************");

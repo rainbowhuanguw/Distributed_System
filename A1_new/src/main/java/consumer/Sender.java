@@ -13,11 +13,11 @@ import java.util.concurrent.TimeoutException;
  * by the Consumer
  */
 public class Sender {
-  private static final String HOST_NAME = "172.31.82.248"; // private rabbitMQ address
-  //private static final String HOST_NAME = "localhost";
+  //private static final String HOST_NAME = "172.31.82.248"; // private rabbitMQ address
+  private static final String HOST_NAME = "localhost";
   private static final String REQUEST_QUEUE_NAME = "mq";
-  private static final String USER_NAME = "rainbow";
-  private static final String PASSWORD = "123456";
+  private static final String USER_NAME = "rainbow"; // rabbitmq user name
+  private static final String PASSWORD = "123456";   // rabbitmq password
   private static final int PORT_NUMBER = 5672;
 
   private static ConnectionFactory factory = null;

@@ -17,15 +17,18 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  * Custom thread class
  */
 public class ProducerThread extends Thread {
-  private static final String PREFIX = "http://"
-      + "18.234.189.1:8080/A2_war" +            // for ec2
-      // + "localhost:8080/A2_war_exploded" +   // for local
-      "/skiers/resort1/seasons/season1/days/day1/skiers/";
+  //private static final String HOST = "http://18.234.189.1:8080/A3_war"; // for ec2
+  private static final String HOST = "http://localhost:8080/A3_war_exploded"; // for local
+  private static final String SEASON = "/seasons/";
+  private static final String DAY = "/days/";
+  private static final String SKIER = "/skiers/";
+  private static final String RESORT = "/resorts/";
 
   private static final int SUCCESS = 200;
   private static final String POST = "POST";
   private static final int MIN_LIFT = 1;
   private static final int TRY_TIME = 5;
+  private static final int MAX_RESORT_ID = 100;
 
   private final int skierIdStart;
   private final int skierIdEnd;
@@ -64,25 +67,40 @@ public class ProducerThread extends Thread {
     for (int i = 0; i < numPosts; i++) {
       // generate random id, time value, and lift id
       int skierId = RandomNumGenerator.generateNum(skierIdStart, skierIdEnd);
+      int resortId = RandomNumGenerator.generateNum(1, MAX_RESORT_ID);
       int timeValue = RandomNumGenerator.generateNum(startTime, endTime);
       int liftId = RandomNumGenerator.generateNum(MIN_LIFT, numLifts);
+      int seasonId = RandomNumGenerator.generateYear();
+      int dayId = RandomNumGenerator.generateDay();
 
-      // send one post request
-      sendPostRequest(skierId, timeValue, liftId);
+      // send one skier post request
+      sendPostRequest(SKIER, resortId, skierId, timeValue, liftId, seasonId, dayId);
     }
+  }
+
+  private static String generateURL(String type, int resortId, int skierId, int seasonId, int dayId) {
+    String suffix = resortId + SEASON + seasonId + DAY + dayId + SKIER + skierId;
+
+    if (type.equals(RESORT) || type.equals(SKIER)) {
+      return HOST + type + suffix;
+    }
+
+    return "";
   }
   
   /**
    * Sends out one post request to the server
    */
-  public void sendPostRequest(int skierId, int timeValue, int liftId) {
+  public void sendPostRequest(String type, int resortId, int skierId, int timeValue, int liftId,
+      int seasonId, int dayId) {
     // create a response object, store in the queue
-    LiftRide res = new LiftRide(skierId, liftId, timeValue);
+    LiftRide res = new LiftRide(skierId, liftId, timeValue, seasonId, dayId);
 
     HttpRequest request = HttpRequest.newBuilder()
         // turn time and lift id as request body, then convert into json
         .POST(HttpRequest.BodyPublishers.ofString(res.toJsonString()))
-        .uri(URI.create(PREFIX + skierId)) // put skier id into url
+        // put skier id into url
+        .uri(URI.create(generateURL(type, resortId, skierId, seasonId, dayId)))
         .setHeader("Client", "skier:" + skierId) // add request header
         .version(Version.HTTP_1_1)
         .build();
