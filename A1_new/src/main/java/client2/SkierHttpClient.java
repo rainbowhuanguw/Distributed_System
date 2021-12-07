@@ -1,6 +1,7 @@
 package client2;
 
 import info.InfoPackage;
+import java.util.concurrent.SynchronousQueue;
 import util.Counter;
 import java.net.http.HttpClient;
 import java.net.http.HttpClient.Version;
@@ -131,7 +132,7 @@ public class SkierHttpClient {
     System.out.println(numThreads + " " + numSkiers + " " + numLifts + " " + numRuns);
 
     // set up counters to count finished threads
-    List<Thread> allThreads = new ArrayList<>();
+    List<Thread> allThreads = Collections.synchronizedList(new ArrayList<>());
     // counter for failed responses
     Counter failureCounter = new Counter();
 

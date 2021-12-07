@@ -12,22 +12,31 @@ public class URLVerifier {
   private static final String SEASON = "seasons";
   private static final String DAY = "days";
   private static final String SKIER = "skiers";
+  private static final String RESORT = "resorts";
   private static final List<String> keywords = Arrays.asList(SEASON, DAY, SKIER);
 
   /**
    * Checks if a given list of url parts fits the
-   * valid format: {resortID}/seasons/{seasonID}/days/{dayID}/skiers/{skierID}
-   * // url parts : [, resortID, seasons, seasonID, days, dayId, skiers, skierID]
-   * // example url : http://localhost:8080/A1_war_exploded/skiers/r1/seasons1/s1/days/d1/skiers/123
+   * valid format: skiers OR resorts/{resortID}/seasons/{seasonID}/days/{dayID}/skiers/{skierID}
+   * // url parts : [ , resortID, seasons, seasonID, days, dayId, skiers, skierID]
+   * // example url : /A3_war_exploded/resorts/9/seasons/2017/days/264/skiers/8
    */
-  public static boolean isValidSkierUrl(String[] urlParts) {
+  public static boolean isValidURL(String[] urlParts) {
     if (urlParts.length < URL_LEN) return false;
 
-    // examining from index 2
-    for (int i = 2; i < URL_LEN; i += 2) {
-      if (!urlParts[i].equals(keywords.get(i/2 - 1))) return false;
+    String type = getType(urlParts);
+    if (!type.equals(SKIER) && !type.equals(RESORT)) return false;
+
+    // examining from index 4
+    for (int i = 4; i < URL_LEN; i += 2) {
+      if (!urlParts[i].equals(keywords.get(i/2 - 2))) return false;
     }
+
     return true;
+  }
+
+  public static String getType(String[] urlParts) {
+    return urlParts[2];
   }
 
 }

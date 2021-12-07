@@ -14,6 +14,8 @@ import util.URLVerifier;
 public class SkierServlet extends HttpServlet {
   private static final String DELIM = "/";
   private static final Gson gson = new Gson();
+  protected static final String RESORT_TYPE = "resorts";
+  protected static final String SKIER_TYPE = "skiers";
 
   protected void doGet(HttpServletRequest request, HttpServletResponse response)
       throws ServletException, IOException {
@@ -31,7 +33,7 @@ public class SkierServlet extends HttpServlet {
     // check and send response
     String[] urlParts = urlPath.split(DELIM);
 
-    if (URLVerifier.isValidSkierUrl(urlParts)) {
+    if (URLVerifier.isValidURL(urlParts)) {
       response.getWriter().write("<h1>" + "It works!" + "</h1>\n");
       response.setStatus(HttpServletResponse.SC_OK);
     } else {
@@ -45,7 +47,7 @@ public class SkierServlet extends HttpServlet {
     response.setContentType("application/json"); // output text
 
     Gson gson = new Gson();
-    String urlPath = request.getPathInfo();
+    String urlPath = request.getRequestURI();
 
     // check we have a URL!
     if (urlPath == null || urlPath.isEmpty()) {
@@ -53,19 +55,18 @@ public class SkierServlet extends HttpServlet {
       return;
     }
 
-    // make response
+    // check and send response
+    String[] urlParts = urlPath.split(DELIM);
+
     // get request body, user input in "body" by default
     BufferedReader inputReader = request.getReader();
     LiftRide liftRide = toLiftRide(inputReader); // convert to string
 
-    // check and send response
-    String[] urlParts = urlPath.split(DELIM);
-
-    if (URLVerifier.isValidSkierUrl(urlParts)) {
-
+    if (URLVerifier.isValidURL(urlParts)) {
+      // make response
       // put message to rabbitMQ by calling sender
       try {
-        Sender.sendAMessage(liftRide);
+        Sender.sendAMessage(liftRide, URLVerifier.getType(urlParts));
       } catch (Exception e) {
         e.printStackTrace();
       }
@@ -88,6 +89,7 @@ public class SkierServlet extends HttpServlet {
     while((line = bufferIn.readLine()) != null) {
       builder.append(line);
     }
+
     return gson.fromJson(builder.toString(), LiftRide.class);
   }
 }

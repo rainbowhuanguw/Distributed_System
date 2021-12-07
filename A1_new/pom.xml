@@ -35,7 +35,7 @@
               <archive>
                 <manifest>
                   <mainClass>
-                    consumer.Consumer
+                    consumer.SkierConsumer
                   </mainClass>
                 </manifest>
               </archive>
@@ -144,6 +144,16 @@
       <type>maven-plugin</type>
     </dependency>
     <!-- dependencies for plugins end -->
+
+    <!-- dependencies for java JDBC start -->
+    <dependency>
+      <groupId>mysql</groupId>
+      <artifactId>mysql-connector-java</artifactId>
+      <version>8.0.27</version>
+    </dependency>
+    <!-- dependencies for java JDBC end -->
+
+
 
   </dependencies>
 

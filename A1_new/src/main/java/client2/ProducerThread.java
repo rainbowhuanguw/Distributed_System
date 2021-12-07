@@ -21,14 +21,14 @@ public class ProducerThread extends Thread {
   private static final String HOST = "http://localhost:8080/A3_war_exploded"; // for local
   private static final String SEASON = "/seasons/";
   private static final String DAY = "/days/";
-  private static final String SKIER = "/skiers/";
-  private static final String RESORT = "/resorts/";
+  public static final String SKIER = "/skiers/";
+  public static final String RESORT = "/resorts/";
 
   private static final int SUCCESS = 200;
   private static final String POST = "POST";
   private static final int MIN_LIFT = 1;
   private static final int TRY_TIME = 5;
-  private static final int MAX_RESORT_ID = 100;
+  private static final int MAX_RESORT_ID = 10; // assuming only ten resorts available
 
   private final int skierIdStart;
   private final int skierIdEnd;
@@ -75,6 +75,9 @@ public class ProducerThread extends Thread {
 
       // send one skier post request
       sendPostRequest(SKIER, resortId, skierId, timeValue, liftId, seasonId, dayId);
+
+      // send one resort post request
+      sendPostRequest(RESORT, resortId, skierId, timeValue, liftId, seasonId, dayId);
     }
   }
 
@@ -93,14 +96,21 @@ public class ProducerThread extends Thread {
    */
   public void sendPostRequest(String type, int resortId, int skierId, int timeValue, int liftId,
       int seasonId, int dayId) {
-    // create a response object, store in the queue
-    LiftRide res = new LiftRide(skierId, liftId, timeValue, seasonId, dayId);
+    // create a response object
+    LiftRide liftRide = new LiftRide(skierId, liftId, timeValue, seasonId, dayId, resortId);
+    // create a url
+    String url = generateURL(type, resortId, skierId, seasonId, dayId);
 
+    System.out.println(url);
+    // skip empty urls
+    if (url.isEmpty()) return;
+
+    // send requests, process by servlet internally
     HttpRequest request = HttpRequest.newBuilder()
         // turn time and lift id as request body, then convert into json
-        .POST(HttpRequest.BodyPublishers.ofString(res.toJsonString()))
+        .POST(HttpRequest.BodyPublishers.ofString(liftRide.toJsonString()))
         // put skier id into url
-        .uri(URI.create(generateURL(type, resortId, skierId, seasonId, dayId)))
+        .uri(URI.create(url))
         .setHeader("Client", "skier:" + skierId) // add request header
         .version(Version.HTTP_1_1)
         .build();

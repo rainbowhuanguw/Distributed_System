@@ -7,15 +7,18 @@ public class LiftRide {
   private final int skierId;
   private final int liftId;
   private final int time;
-  private final int season;
-  private final int day;
+  private final int seasonId;
+  private final int dayId;
+  private final int resortId;
 
-  public LiftRide(int skierId, int liftId, int time, int season, int day) {
+  public LiftRide(int skierId, int liftId, int time, int seasonsId, int dayId,
+      int resortId) {
     this.skierId = skierId;
     this.liftId = liftId;
     this.time = time;
-    this.season = season;
-    this.day = day;
+    this.seasonId = seasonsId;
+    this.dayId = dayId;
+    this.resortId = resortId;
   }
 
   public int getSkierId() {
@@ -30,22 +33,27 @@ public class LiftRide {
     return time;
   }
 
-  public int getSeason() { return season; }
+  public int getSeasonId() { return seasonId; }
 
-  public int getDay() { return day; }
+  public int getDayId() { return dayId; }
+
+  public int getResortId() {
+    return resortId;
+  }
 
   public String toJsonString() {
     return "{" +
         "\"skierId\":" + skierId +
         ",\"liftId\":" + liftId +
         ",\"time\":" + time +
-        ",\"season\":" + season +
-        ",\"day\":" + day +
+        ",\"seasonId\":" + seasonId +
+        ",\"dayId\":" + dayId +
+        ",\"resortId\":" + resortId +
         '}';
   }
 
   @Override
   public String toString() {
-    return skierId + "," + liftId + "," + time + "," + season + "," + day;
+    return skierId + "," + liftId + "," + time + "," + seasonId + "," + dayId + "," + resortId;
   }
 }
