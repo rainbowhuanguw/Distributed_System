@@ -3,33 +3,23 @@ package consumer;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.DeliverCallback;
+import database.SkierDBConnector;
 import java.nio.charset.StandardCharsets;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CountDownLatch;
-import util.Counter;
+import java.sql.SQLException;
 
 /**
  * Custom thread class to consume messages from rabbitmq
  */
 public class SkierConsumerThread extends Thread {
-  private static final String SKIER_QUEUE_NAME = "skierQueue";
+  private static final String QUEUE_NAME = "skierQueue";
   private static final String DELIM = ",";
 
-  private static Map<Integer, Map<Integer, Map<Integer, Map<Integer, Integer>>>> skierToRides;
   private static Channel channel;
-  private static CountDownLatch countDownLatch;
-  private static Counter counter;
 
-  public SkierConsumerThread( Connection connection,
-      Map<Integer, Map<Integer, Map<Integer, Map<Integer, Integer>>>> map,
-      CountDownLatch countDownLatch, Counter counter)
+  public SkierConsumerThread( Connection connection)
       throws Exception {
     // set up channel
     channel = connection.createChannel();
-    SkierConsumerThread.skierToRides = map;
-    SkierConsumerThread.countDownLatch = countDownLatch;
-    SkierConsumerThread.counter = counter;
   }
 
   @Override
@@ -43,7 +33,7 @@ public class SkierConsumerThread extends Thread {
 
   private void consumeAMessage() throws Exception {
     // stays active to listen
-    channel.queueDeclare(SKIER_QUEUE_NAME, false, false, false, null);
+    channel.queueDeclare(QUEUE_NAME, false, false, false, null);
 
     // gets callback/messages from queue
     DeliverCallback deliverCallback = (consumerTag, deliver) -> {
@@ -54,28 +44,20 @@ public class SkierConsumerThread extends Thread {
       String[] split = message.split(DELIM);
       int skierId = Integer.parseInt(split[0]),
           liftId = Integer.parseInt(split[1]),
-          time = Integer.parseInt(split[2]),
+          hour = Integer.parseInt(split[2]),
           seasonId = Integer.parseInt(split[3]),
-          dayId = Integer.parseInt(split[4]);
+          dayId = Integer.parseInt(split[4]),
+          resortId = Integer.parseInt(split[5]);
 
-      // outer key check
-      skierToRides.putIfAbsent(skierId, new ConcurrentHashMap<>());
-      // first level key check - season
-      skierToRides.get(skierId).putIfAbsent(seasonId, new ConcurrentHashMap<>());
-      // second level key check - day
-      skierToRides.get(skierId).get(seasonId).putIfAbsent(dayId, new ConcurrentHashMap<>());
-      // third level key check - lift ride id
-      int count = skierToRides.get(skierId).get(seasonId).get(dayId).getOrDefault(liftId, 0);
-      // update value
-      skierToRides.get(skierId).get(seasonId).get(dayId).put(liftId, count + 1);
+      try {
+        SkierDBConnector.write(resortId, seasonId, dayId, hour, skierId, liftId);
+      } catch (SQLException throwables) {
+        throwables.printStackTrace();
+      }
 
-      // count down
-      countDownLatch.countDown();
-      //counter.increment();
-      //System.out.println(" " + counter.getVal());
     };
 
     // auto ack
-    channel.basicConsume(SKIER_QUEUE_NAME, true, deliverCallback, consumerTag -> { });
+    channel.basicConsume(QUEUE_NAME, true, deliverCallback, consumerTag -> { });
   }
 }

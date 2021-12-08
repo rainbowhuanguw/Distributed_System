@@ -3,34 +3,23 @@ package consumer;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.DeliverCallback;
+import database.ResortDBConnector;
 import java.nio.charset.StandardCharsets;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CountDownLatch;
-import util.Counter;
+import java.sql.SQLException;
 
 /**
  * Custom thread class to consume messages from rabbitmq
  */
 public class ResortConsumerThread extends Thread {
-  private static final String REQUEST_QUEUE_NAME = "resortQueue";
+  private static final String QUEUE_NAME = "resortQueue";
   private static final String DELIM = ",";
 
-  private static Map<Integer, Map<Integer, Map<Integer,
-      Map<Integer, Map<Integer, Map<Integer, Integer>>>>>> resortToRides;
   private static Channel channel;
-  private static CountDownLatch countDownLatch;
-  private static Counter counter;
 
-  public ResortConsumerThread(Connection connection, Map<Integer, Map<Integer, Map<Integer,
-      Map<Integer, Map<Integer, Map<Integer, Integer>>>>>> resortToRides,
-      CountDownLatch countDownLatch, Counter counter)
+  public ResortConsumerThread(Connection connection)
       throws Exception {
     // set up channel
     channel = connection.createChannel();
-    ResortConsumerThread.resortToRides = resortToRides;
-    ResortConsumerThread.countDownLatch = countDownLatch;
-    ResortConsumerThread.counter = counter;
   }
 
   @Override
@@ -44,7 +33,7 @@ public class ResortConsumerThread extends Thread {
 
   private void consumeAMessage() throws Exception {
     // stays active to listen
-    channel.queueDeclare(REQUEST_QUEUE_NAME, false, false, false, null);
+    channel.queueDeclare(QUEUE_NAME, false, false, false, null);
 
     // gets callback/messages from queue
     DeliverCallback deliverCallback = (consumerTag, deliver) -> {
@@ -57,33 +46,17 @@ public class ResortConsumerThread extends Thread {
           liftId = Integer.parseInt(split[1]),
           hour = Integer.parseInt(split[2]),
           season = Integer.parseInt(split[3]),
-          day = Integer.parseInt(split[4]);
+          day = Integer.parseInt(split[4]),
+          resortId = Integer.parseInt(split[5]);
 
-      // outer-level key check resortId
-      resortToRides.putIfAbsent(skierId, new ConcurrentHashMap<>());
-      // first-level key check - season
-      resortToRides.get(skierId).putIfAbsent(season, new ConcurrentHashMap<>());
-      // second-level key check - day
-      resortToRides.get(skierId).get(season).putIfAbsent(day, new ConcurrentHashMap<>());
-      // third-level key check - hour
-      resortToRides.get(skierId).get(season).get(day).putIfAbsent(hour, new ConcurrentHashMap<>());
-      // fourth-level key check - lift ride id
-      resortToRides.get(skierId).get(season).get(day).get(hour).putIfAbsent(liftId,
-          new ConcurrentHashMap<>());
-      // fifth-level - skierid
-      int count = resortToRides.get(skierId).get(season).get(day).get(hour).get(liftId)
-          .getOrDefault(skierId, 0);
-
-      // update value
-      resortToRides.get(skierId).get(season).get(day).get(hour).get(liftId).put(skierId, count + 1);
-
-      // count down
-      countDownLatch.countDown();
-      //counter.increment();
-      //System.out.println(" " + counter.getVal());
+      try {
+        ResortDBConnector.write(resortId, season, day, hour, skierId, liftId);
+      } catch (SQLException throwables) {
+        throwables.printStackTrace();
+      }
     };
 
     // auto ack
-    channel.basicConsume(REQUEST_QUEUE_NAME, true, deliverCallback, consumerTag -> { });
+    channel.basicConsume(QUEUE_NAME, true, deliverCallback, consumerTag -> { });
   }
 }

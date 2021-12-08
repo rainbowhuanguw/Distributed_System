@@ -24,18 +24,8 @@ public class SkierConsumer {
 
   private static ConnectionFactory factory = null;
   private static Connection connection = null; // threads share one connection
-  // count how many messages have been processed
-  private static final CountDownLatch countDownLatch = new CountDownLatch(totalMessages);
 
-  private static final Counter counter = new Counter();
   private static final Thread[] threads = new Thread[NUM_THREADS];
-
-  // outer key : skierId, value : nested map
-  // first-level key : seasonId, value : nested map
-  // second-level key : dayId, value : nested map
-  // third-level key : liftId, value : number of lift rides
-  private static final Map<Integer, Map<Integer, Map<Integer, Map<Integer, Integer>>>> skierToRides
-      = new ConcurrentHashMap<>();
 
   private static void setupConnection() throws Exception {
     // creates a factory for connection and channel
@@ -53,7 +43,7 @@ public class SkierConsumer {
 
     // create threads, connections, and channels
     for (int i = 0; i < NUM_THREADS; i++) {
-      threads[i] = new SkierConsumerThread(connection, skierToRides, countDownLatch, counter);
+      threads[i] = new SkierConsumerThread(connection);
     }
 
     System.out.println("waiting for messages...");
@@ -71,36 +61,9 @@ public class SkierConsumer {
       thread.start();
     }
 
-    // wait for all consumer threads to finish
-    countDownLatch.await();
-
-    // close connection manually
-    connection.close();
-  }
-
-  /**
-   * After hashmap is done, write to database
-   */
-  public static void writeToDB() throws SQLException {
-    for (int skierId : skierToRides.keySet()) {
-      for (int season : skierToRides.get(skierId).keySet()) {
-        for (int day : skierToRides.get(skierId).get(season).keySet()) {
-          for (int liftId : skierToRides.get(skierId).get(season).get(day).keySet()) {
-            SkierDBConnector.write(
-                skierId,
-                season,
-                day,
-                liftId,
-                skierToRides.get(skierId).get(season).get(day).get(liftId)
-            );
-          }
-        }
-      }
-    }
   }
 
   public static void main(String[] args) throws Exception {
     SkierConsumer.consumeMessages();
-    SkierConsumer.writeToDB();
   }
 }
