@@ -1,7 +1,6 @@
 package client2;
 
 import info.InfoPackage;
-import java.util.concurrent.SynchronousQueue;
 import util.Counter;
 import java.net.http.HttpClient;
 import java.net.http.HttpClient.Version;
@@ -58,52 +57,24 @@ public class SkierHttpClient {
    * Runs a phase, e.g. peak, cooldown etc.
    */
   private static void runPhase(double factor, int numThreads, int numRuns, int numSkiers,
-      int numLifts, List<Thread> allThreads, Counter failureCounter,
-      ConcurrentLinkedQueue<InfoPackage> infoQueue) throws InterruptedException {
-
-    // keep track of count of threads created
-    final Counter finishedThreads = new Counter();
-    CountDownLatch createdThreads = new CountDownLatch(numThreads);
-
-    // array to store threads
-    Thread[] tids = new Thread[numThreads];
+      int numLifts, Counter failureCounter, Counter allCounter, CountDownLatch roundCounter,
+      CountDownLatch latch, ConcurrentLinkedQueue<InfoPackage> infoQueue) {
 
     // calculate number of posts
     int numPosts;
-    if (factor == STARTUP_FACTOR || factor == PEAK_FACTOR)
+    if (factor == STARTUP_FACTOR || factor == PEAK_FACTOR) {
       numPosts = (int) (factor * numRuns * numSkiers / numThreads);
-    else numPosts = (int) factor * numRuns;
+    } else {
+      numPosts = (int) factor * numRuns;
+    }
 
     // create numThreads threads
     for (int i = 0; i < numThreads; i++) {
       // create and start threads
       Thread thread = new ProducerThread(i, numLifts, numThreads, numSkiers, numPosts,
-          httpClient, failureCounter, infoQueue);
-      tids[i] = thread; // store in the array to check for liveliness within this phase
-      allThreads.add(thread); // store in the list to shared across three phases
-
-      createdThreads.countDown(); // count
+          httpClient, failureCounter, allCounter, roundCounter, latch, infoQueue);
       thread.start(); // start
     }
-
-    // count number of alive threads
-    while (finishedThreads.getVal() < Math.ceil(RUN_FACTOR * numThreads)) {
-      for (Thread curr : tids) {
-        if (!curr.isAlive()) finishedThreads.increment();
-        if (finishedThreads.getVal() >= Math.ceil(RUN_FACTOR * numThreads)) break;
-      }
-    }
-
-    // run next phase when factor * numThreads is reached
-    if (factor == STARTUP_FACTOR) { // run phase 2
-      runPhase(PEAK_FACTOR, numThreads * DIVISOR, numRuns, numSkiers, numLifts,
-          allThreads, failureCounter, infoQueue);
-    } else if (factor == PEAK_FACTOR) { // run phase 3
-      runPhase(COOLDOWN_FACTOR, numThreads / DIVISOR, numRuns, numSkiers, numLifts,
-          allThreads, failureCounter, infoQueue);
-    }
-
-    createdThreads.await(); // wait till all threads within this phase are created
   }
 
   public static void main(String[] args) throws Exception {
@@ -131,28 +102,45 @@ public class SkierHttpClient {
 
     System.out.println(numThreads + " " + numSkiers + " " + numLifts + " " + numRuns);
 
-    // set up counters to count finished threads
-    List<Thread> allThreads = Collections.synchronizedList(new ArrayList<>());
     // counter for failed responses
-    Counter failureCounter = new Counter();
+    Counter failureCounter = new Counter(), allCounter = new Counter();
+
+    // count down latch for counting threads
+    CountDownLatch latch = new CountDownLatch((numThreads / DIVISOR) * 2 + numThreads);
 
     // stores info pack
     ConcurrentLinkedQueue<InfoPackage> infoQueue = new ConcurrentLinkedQueue<>();
 
+    // mark start time
     long start = System.currentTimeMillis();
 
-    // start by doing phase 1
+    // start phase 1
+    CountDownLatch roundCounter1 = new CountDownLatch((int) Math.ceil(numThreads * RUN_FACTOR / DIVISOR)),
+        roundCounter2 = new CountDownLatch((int) Math.ceil(numThreads * RUN_FACTOR)),
+        roundCounter3 = new CountDownLatch((int) Math.ceil(numThreads * RUN_FACTOR / DIVISOR));
+
+    System.out.println("starting phase 1  " + roundCounter1.getCount());
     runPhase(STARTUP_FACTOR, numThreads / DIVISOR, numRuns, numSkiers, numLifts,
-        allThreads, failureCounter, infoQueue);
+        failureCounter, allCounter, roundCounter1, latch, infoQueue);
+
+    // start phase 2
+    roundCounter1.await();
+    System.out.println("starting phase 2  " + roundCounter1.getCount() + " " + roundCounter2.getCount());
+    runPhase(PEAK_FACTOR, numThreads, numRuns, numSkiers, numLifts, failureCounter, allCounter,
+        roundCounter2, latch, infoQueue);
+
+    // start phase 3
+    roundCounter2.await();
+    System.out.println("starting phase 3  " + roundCounter2.getCount());
+    runPhase(COOLDOWN_FACTOR, numThreads / DIVISOR, numRuns, numSkiers, numLifts,
+        failureCounter, allCounter, roundCounter3, latch, infoQueue);
 
     // counter to wait for all three phases to finish
-    for (Thread thread : allThreads) thread.join();
+    latch.await();
 
     long end = System.currentTimeMillis();
 
-    int totalRequests = (int)(numSkiers * numRuns * STARTUP_FACTOR) +
-        (int)(numSkiers * numRuns * PEAK_FACTOR) +
-        (int)(numRuns * COOLDOWN_FACTOR * numThreads / DIVISOR);
+    int totalRequests = allCounter.getCount();
 
     long sumLatency = 0; // calculate average latency
     List<Long> latencies = new ArrayList<>(); // calculate median
@@ -173,7 +161,7 @@ public class SkierHttpClient {
 
     System.out.println("**************************************");
     System.out.println("number of requests: " + totalRequests);
-    System.out.println("number of failures: " + failureCounter.getVal());
+    System.out.println("number of failures: " + failureCounter.getCount());
     System.out.println("total response time (ms): " + (end - start));
     System.out.println("throughput (request/s): " + (totalRequests * 1000.0) / (end - start));
     System.out.println("average response time (ms): " + averageLatency);

@@ -1,6 +1,7 @@
 package client2;
 
 import info.InfoPackage;
+import java.util.concurrent.CountDownLatch;
 import util.Counter;
 import util.RandomNumGenerator;
 import util.RangeGenerator;
@@ -39,12 +40,15 @@ public class ProducerThread extends Thread {
 
   private final HttpClient client;
   private final Counter failureCounter;
+  private final Counter allCounter;
+  private final CountDownLatch roundCounter;
+  private final CountDownLatch latch;
 
   private final ConcurrentLinkedQueue<InfoPackage> infoQueue;
 
   public ProducerThread(int threadId,  int numLifts, int numThreads, int numSkiers,
-      int numPosts, HttpClient client, Counter failureCounter,
-      ConcurrentLinkedQueue<InfoPackage> infoQueue) {
+      int numPosts, HttpClient client, Counter failureCounter, Counter allCounter,
+      CountDownLatch roundCounter, CountDownLatch latch, ConcurrentLinkedQueue<InfoPackage> infoQueue) {
     // calculate skier id range
     int[] idRange = RangeGenerator.getSkierIdRange(numSkiers/numThreads, threadId);
     this.skierIdStart = idRange[0];
@@ -58,7 +62,9 @@ public class ProducerThread extends Thread {
     this.numLifts = numLifts;
     this.client = client;
     this.failureCounter = failureCounter;
-
+    this.allCounter = allCounter;
+    this.roundCounter = roundCounter;
+    this.latch = latch;
     this.infoQueue = infoQueue;
   }
 
@@ -79,6 +85,10 @@ public class ProducerThread extends Thread {
       // send one resort post request
       sendPostRequest(RESORT, resortId, skierId, timeValue, liftId, seasonId, dayId);
     }
+
+    roundCounter.countDown();
+
+    latch.countDown();
   }
 
   private static String generateURL(String type, int resortId, int skierId, int seasonId, int dayId) {
@@ -101,7 +111,7 @@ public class ProducerThread extends Thread {
     // create a url
     String url = generateURL(type, resortId, skierId, seasonId, dayId);
 
-    System.out.println(url);
+    //System.out.println(url);
     // skip empty urls
     if (url.isEmpty()) return;
 
@@ -140,5 +150,7 @@ public class ProducerThread extends Thread {
 
     // add to queue
     infoQueue.add(new InfoPackage(startTime, endTime, POST, response.statusCode()));
+
+    allCounter.increment();
   }
 }
