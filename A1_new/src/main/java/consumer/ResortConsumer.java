@@ -2,12 +2,6 @@ package consumer;
 
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
-import database.ResortDBConnector;
-import java.sql.SQLException;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CountDownLatch;
-import util.Counter;
 
 /**
  * Multi-threaded consumer, pulls message from RabbitMQ, and stores a record of individual
@@ -18,9 +12,9 @@ public class ResortConsumer {
   //private static final String HOST_NAME = "52.201.226.244"; // public rabbitmq address
   private static final String HOST_NAME = "localhost";
   private static final int PORT_NUMBER = 5672;
-  private static final String USER_NAME = "rainbow"; // rabbitmq user name
-  private static final String PASSWORD = "123456"; // rabbitmq password
-  private static final int NUM_THREADS = 10;
+  private static final String USER_NAME = "rainbow"; // remote rabbitmq user name
+  private static final String PASSWORD = "123456"; // remote rabbitmq password
+  private static final int NUM_THREADS = 64;
 
   private static ConnectionFactory factory = null;
   private static Connection connection = null; // threads share one connection

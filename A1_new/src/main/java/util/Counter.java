@@ -13,7 +13,13 @@ public class Counter {
       this.count++;
     }
 
-    public int getVal() {
+    synchronized public void decrement() {
+    this.count--;
+  }
+
+    public int getCount() {
       return this.count;
     }
+
+    synchronized public void reset() { this.count = 0; }
 }

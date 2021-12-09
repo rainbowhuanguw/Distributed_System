@@ -114,24 +114,25 @@ public class SkierHttpClient {
     // mark start time
     long start = System.currentTimeMillis();
 
-    // start phase 1
+
     CountDownLatch roundCounter1 = new CountDownLatch((int) Math.ceil(numThreads * RUN_FACTOR / DIVISOR)),
         roundCounter2 = new CountDownLatch((int) Math.ceil(numThreads * RUN_FACTOR)),
         roundCounter3 = new CountDownLatch((int) Math.ceil(numThreads * RUN_FACTOR / DIVISOR));
 
-    System.out.println("starting phase 1  " + roundCounter1.getCount());
+    // start phase 1
+    System.out.println("starting phase 1");
     runPhase(STARTUP_FACTOR, numThreads / DIVISOR, numRuns, numSkiers, numLifts,
         failureCounter, allCounter, roundCounter1, latch, infoQueue);
 
     // start phase 2
     roundCounter1.await();
-    System.out.println("starting phase 2  " + roundCounter1.getCount() + " " + roundCounter2.getCount());
+    System.out.println("starting phase 2");
     runPhase(PEAK_FACTOR, numThreads, numRuns, numSkiers, numLifts, failureCounter, allCounter,
         roundCounter2, latch, infoQueue);
 
     // start phase 3
     roundCounter2.await();
-    System.out.println("starting phase 3  " + roundCounter2.getCount());
+    System.out.println("starting phase 3");
     runPhase(COOLDOWN_FACTOR, numThreads / DIVISOR, numRuns, numSkiers, numLifts,
         failureCounter, allCounter, roundCounter3, latch, infoQueue);
 

@@ -1,4 +1,4 @@
-package consumer;
+package sender;
 
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
@@ -12,14 +12,13 @@ import java.util.concurrent.TimeoutException;
  * Sends a lift ride log generated in the doPost process to the rabbitmq to be consume later
  * by the Consumer
  */
-public class Sender {
+public class ResortMessageSender {
 
   //private static final String HOST_NAME = "172.31.82.248"; // private rabbitMQ address
   private static final String HOST_NAME = "localhost";
-  private static final String SKIER_QUEUE_NAME = "skierQueue";
-  private static final String RESORT_QUEUE_NAME = "resortQueue";
-  private static final String EXCHANGE_NAME = "logs";
-  private static final String EXCHANGE_TYPE = "fanout";
+  private static final String QUEUE_NAME = "resortQueue";
+  private static final String EXCHANGE_NAME = "resort-exchange";
+  private static final String EXCHANGE_TYPE = "direct";
 
   private static final String USER_NAME = "rainbow"; // rabbitmq user name
   private static final String PASSWORD = "123456";   // rabbitmq password
@@ -52,12 +51,8 @@ public class Sender {
       channel.exchangeDeclare(EXCHANGE_NAME, EXCHANGE_TYPE);
 
       // bind skier queue and exchange
-      channel.queueDeclare(SKIER_QUEUE_NAME, false, false, false, null);
-      channel.queueBind(SKIER_QUEUE_NAME, EXCHANGE_NAME, "");
-
-      // bind skier queue and exchange
-      channel.queueDeclare(RESORT_QUEUE_NAME, false, false, false, null);
-      channel.queueBind(RESORT_QUEUE_NAME, EXCHANGE_NAME, "");
+      channel.queueDeclare(QUEUE_NAME, false, false, false, null);
+      channel.queueBind(QUEUE_NAME, EXCHANGE_NAME, "");
 
       // create a channel after connection is established
       // sends one message once
@@ -67,7 +62,7 @@ public class Sender {
       channel.basicPublish(EXCHANGE_NAME, "", null,
           message.getBytes(StandardCharsets.UTF_8));
 
-      System.out.println(" [x] Sent '" + message + "'");
+      //System.out.println(" [x] Sent '" + message + "'");
     }
   }
 }

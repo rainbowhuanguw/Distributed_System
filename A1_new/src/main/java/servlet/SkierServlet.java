@@ -7,7 +7,8 @@ import javax.servlet.*;
 import javax.servlet.http.*;
 import javax.servlet.annotation.*;
 import java.io.IOException;
-import consumer.Sender;
+import sender.ResortMessageSender;
+import sender.SkierMessageSender;
 import util.URLVerifier;
 
 @WebServlet(name = "servlet.SkierServlet", value = "/servlet.SkierServlet")
@@ -18,20 +19,20 @@ public class SkierServlet extends HttpServlet {
   protected static final String SKIER_TYPE = "skiers";
 
   protected void doGet(HttpServletRequest request, HttpServletResponse response)
-      throws ServletException, IOException {
+      throws IOException {
     response.setContentType("text/html"); // output text
 
     String urlPath = request.getPathInfo();
 
-    // check we have a URL!
+    // check if we have a URL
     if (urlPath == null || urlPath.isEmpty()) {
       response.setStatus(HttpServletResponse.SC_NOT_FOUND);
       response.getWriter().write("missing parameters");
       return;
     }
 
-    // check and send response
     String[] urlParts = urlPath.split(DELIM);
+
 
     if (URLVerifier.isValidURL(urlParts)) {
       response.getWriter().write("<h1>" + "It works!" + "</h1>\n");
@@ -43,7 +44,7 @@ public class SkierServlet extends HttpServlet {
 
   @Override
   protected void doPost(HttpServletRequest request, HttpServletResponse response)
-      throws ServletException, IOException {
+      throws IOException {
     response.setContentType("application/json"); // output text
 
     Gson gson = new Gson();
@@ -63,12 +64,20 @@ public class SkierServlet extends HttpServlet {
     LiftRide liftRide = toLiftRide(inputReader); // convert to string
 
     if (URLVerifier.isValidURL(urlParts)) {
-      // make response
       // put message to rabbitMQ by calling sender
-      try {
-        Sender.sendAMessage(liftRide, URLVerifier.getType(urlParts));
-      } catch (Exception e) {
-        e.printStackTrace();
+      String type = URLVerifier.getType(urlParts);
+      if (type.equals(SKIER_TYPE)) {
+        try {
+          SkierMessageSender.sendAMessage(liftRide);
+        } catch (Exception e) {
+          e.printStackTrace();
+        }
+      } else if (type.equals(RESORT_TYPE)) {
+        try {
+          ResortMessageSender.sendAMessage(liftRide);
+        } catch (Exception e) {
+          e.printStackTrace();
+        }
       }
 
       response.getWriter().write(gson.toJson(liftRide));

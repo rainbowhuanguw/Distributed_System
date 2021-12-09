@@ -12,7 +12,6 @@ import java.sql.SQLException;
  */
 public class ResortConsumerThread extends Thread {
   private static final String QUEUE_NAME = "resortQueue";
-  private static final String DELIM = ",";
 
   private static Channel channel;
 
@@ -38,19 +37,10 @@ public class ResortConsumerThread extends Thread {
     // gets callback/messages from queue
     DeliverCallback deliverCallback = (consumerTag, deliver) -> {
       String message = new String(deliver.getBody(), StandardCharsets.UTF_8);
-      System.out.println("[x] Received '" + message + "'");
-
-      // parse the message into key and values in map
-      String[] split = message.split(DELIM);
-      int skierId = Integer.parseInt(split[0]),
-          liftId = Integer.parseInt(split[1]),
-          hour = Integer.parseInt(split[2]),
-          season = Integer.parseInt(split[3]),
-          day = Integer.parseInt(split[4]),
-          resortId = Integer.parseInt(split[5]);
+      //System.out.println("[x] Received '" + message + "'");
 
       try {
-        ResortDBConnector.write(resortId, season, day, hour, skierId, liftId);
+        ResortDBConnector.write(message);
       } catch (SQLException throwables) {
         throwables.printStackTrace();
       }
