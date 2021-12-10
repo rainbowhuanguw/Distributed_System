@@ -18,8 +18,8 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  * Custom thread class
  */
 public class ProducerThread extends Thread {
-  //private static final String HOST = "http://18.234.189.1:8080/A3_war"; // for ec2
-  private static final String HOST = "http://localhost:8080/A3_war_exploded"; // for local
+  private static final String HOST = "http://52.90.110.2:8080/A3_war"; // for ec2
+  //private static final String HOST = "http://localhost:8080/A3_war_exploded"; // for local
   private static final String SEASON = "/seasons/";
   private static final String DAY = "/days/";
   public static final String SKIER = "/skiers/";

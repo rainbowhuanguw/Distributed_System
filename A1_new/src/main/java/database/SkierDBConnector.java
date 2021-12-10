@@ -12,8 +12,10 @@ import java.util.Properties;
 public class SkierDBConnector {
   private static final String DATABASE_DRIVER = "com.mysql.cj.jdbc.Driver";
   private static final String DB_NAME = "skiers";
-  private static final String DATABASE_URL = "jdbc:mysql://localhost:3306/" +
-                                              DB_NAME + "?createDatabaseIfNotExist=true";
+  private static final String DATABASE_URL =
+      //"jdbc:mysql://localhost:3306/" +
+      "jdbc:mysql://database-1.citnt9myvbnx.us-east-1.rds.amazonaws.com:3306/" +
+      DB_NAME + "?createDatabaseIfNotExist=true";
   private static final String USERNAME = "admin";
   private static final String PASSWORD = "12345678";
   private static final String MAX_POOL = "100";
@@ -38,10 +40,23 @@ public class SkierDBConnector {
     if (properties == null) {
       properties = new Properties();
       properties.setProperty("user", USERNAME);
-      //properties.setProperty("password", PASSWORD);
+      properties.setProperty("password", PASSWORD);
       properties.setProperty("MaxPooledStatements", MAX_POOL);
     }
     return properties;
+  }
+
+  public static String prepareStatement(String message) {
+    String[] split = message.split(DELIM);
+    int skierId = Integer.parseInt(split[0]),
+        liftId = Integer.parseInt(split[1]),
+        hour = Integer.parseInt(split[2]),
+        season = Integer.parseInt(split[3]),
+        day = Integer.parseInt(split[4]),
+        resortId = Integer.parseInt(split[5]);
+
+    return "INSERT INTO " + TABLE_NAME + " VALUES(" + resortId + "," + season + "," + day +
+    "," + hour + "," + skierId + "," + liftId + ");";
   }
 
   /**

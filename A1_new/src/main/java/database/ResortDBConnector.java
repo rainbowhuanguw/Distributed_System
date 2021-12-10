@@ -16,7 +16,9 @@ import java.util.Properties;
 public class ResortDBConnector {
   private static final String DATABASE_DRIVER = "com.mysql.cj.jdbc.Driver";
   private static final String DB_NAME = "resorts";
-  private static final String DATABASE_URL = "jdbc:mysql://localhost:3306/" +
+  private static final String DATABASE_URL =
+      //"jdbc:mysql://localhost:3306/" + // local db
+      "jdbc:mysql://database-2.citnt9myvbnx.us-east-1.rds.amazonaws.com" + // remote db
       DB_NAME + "?createDatabaseIfNotExist=true";
   private static final String USERNAME = "admin";
   private static final String PASSWORD = "12345678";

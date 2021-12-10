@@ -72,7 +72,9 @@ public class SkierServlet extends HttpServlet {
         } catch (Exception e) {
           e.printStackTrace();
         }
-      } else if (type.equals(RESORT_TYPE)) {
+      }
+
+      if (type.equals(RESORT_TYPE)) {
         try {
           ResortMessageSender.sendAMessage(liftRide);
         } catch (Exception e) {

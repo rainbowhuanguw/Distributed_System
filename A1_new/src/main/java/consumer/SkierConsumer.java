@@ -8,8 +8,8 @@ import com.rabbitmq.client.ConnectionFactory;
  * lift rides for each skier in the hash map
  */
 public class SkierConsumer {
-  //private static final String HOST_NAME = "52.201.226.244"; // public rabbitmq address
-  private static final String HOST_NAME = "localhost";
+  private static final String HOST_NAME = "3.92.133.65"; // public rabbitmq address
+  //private static final String HOST_NAME = "localhost";
   private static final int PORT_NUMBER = 5672;
   private static final String USER_NAME = "rainbow"; // remote rabbitmq user name
   private static final String PASSWORD = "123456"; // remote rabbitmq password
@@ -24,8 +24,8 @@ public class SkierConsumer {
     // creates a factory for connection and channel
     if (factory == null) {
       factory = new ConnectionFactory();
-      //factory.setUsername(USER_NAME);
-      //factory.setPassword(PASSWORD);
+      factory.setUsername(USER_NAME);
+      factory.setPassword(PASSWORD);
       factory.setHost(HOST_NAME);
       factory.setPort(PORT_NUMBER);
     }
