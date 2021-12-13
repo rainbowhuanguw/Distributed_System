@@ -13,12 +13,12 @@ import java.util.Properties;
  * Establishes connection to a mySQL database
  * modified from https://stackoverflow.com/questions/2839321/connect-java-to-a-mysql-database
   */
-public class ResortDBConnector {
+public class ResortDBWriter {
   private static final String DATABASE_DRIVER = "com.mysql.cj.jdbc.Driver";
   private static final String DB_NAME = "resorts";
   private static final String DATABASE_URL =
-      //"jdbc:mysql://localhost:3306/" + // local db
-      "jdbc:mysql://database-2.citnt9myvbnx.us-east-1.rds.amazonaws.com" + // remote db
+      "jdbc:mysql://localhost:3306/" + // local db
+      //"jdbc:mysql://database-2.citnt9myvbnx.us-east-1.rds.amazonaws.com:3306/" + // remote db
       DB_NAME + "?createDatabaseIfNotExist=true";
   private static final String USERNAME = "admin";
   private static final String PASSWORD = "12345678";
@@ -43,8 +43,8 @@ public class ResortDBConnector {
   private static Properties getProperties() {
     if (properties == null) {
       properties = new Properties();
-      properties.setProperty("user", USERNAME);
-      properties.setProperty("password", PASSWORD);
+      //properties.setProperty("user", USERNAME);
+      //properties.setProperty("password", PASSWORD);
       properties.setProperty("MaxPooledStatements", MAX_POOL);
     }
     return properties;

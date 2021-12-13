@@ -18,8 +18,8 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  * Custom thread class
  */
 public class ProducerThread extends Thread {
-  private static final String HOST = "http://52.90.110.2:8080/A3_war"; // for ec2
-  //private static final String HOST = "http://localhost:8080/A3_war_exploded"; // for local
+  //private static final String HOST = "http://52.90.110.2:8080/A3_war"; // for ec2
+  private static final String HOST = "http://localhost:8080/A3_war_exploded"; // for local
   private static final String SEASON = "/seasons/";
   private static final String DAY = "/days/";
   public static final String SKIER = "/skiers/";
@@ -80,7 +80,7 @@ public class ProducerThread extends Thread {
       int dayId = RandomNumGenerator.generateDay();
 
       // send one skier post request
-      sendPostRequest(SKIER, resortId, skierId, timeValue, liftId, seasonId, dayId);
+      //sendPostRequest(SKIER, resortId, skierId, timeValue, liftId, seasonId, dayId);
 
       // send one resort post request
       sendPostRequest(RESORT, resortId, skierId, timeValue, liftId, seasonId, dayId);

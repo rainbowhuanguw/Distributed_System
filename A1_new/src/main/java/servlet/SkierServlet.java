@@ -1,8 +1,12 @@
 package servlet;
 
 import com.google.gson.Gson;
+import database.ResortDBReader;
+import database.SkierDBReader;
 import info.LiftRide;
 import java.io.BufferedReader;
+import java.net.URL;
+import java.sql.SQLException;
 import javax.servlet.*;
 import javax.servlet.http.*;
 import javax.servlet.annotation.*;
@@ -22,7 +26,7 @@ public class SkierServlet extends HttpServlet {
       throws IOException {
     response.setContentType("text/html"); // output text
 
-    String urlPath = request.getPathInfo();
+    String urlPath = request.getRequestURI();
 
     // check if we have a URL
     if (urlPath == null || urlPath.isEmpty()) {
@@ -33,11 +37,55 @@ public class SkierServlet extends HttpServlet {
 
     String[] urlParts = urlPath.split(DELIM);
 
+    // not a valid url
+//    if (!URLVerifier.isValidURL(urlParts)) {
+//      response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+//    }
+    String type = URLVerifier.getType(urlParts);
 
-    if (URLVerifier.isValidURL(urlParts)) {
-      response.getWriter().write("<h1>" + "It works!" + "</h1>\n");
-      response.setStatus(HttpServletResponse.SC_OK);
-    } else {
+    // process requests starting with resorts
+    if (type.equals(RESORT_TYPE)) {
+      int day = URLVerifier.getDayId(urlParts);
+      int season = URLVerifier.getSeasonId(urlParts);
+      int resortId = URLVerifier.getResortId(urlParts);
+
+      try {
+        int res = ResortDBReader.getSkierOfDay(resortId, season, day);
+        response.getWriter().write("Result is " + res);
+        response.setStatus(HttpServletResponse.SC_OK);
+      } catch (SQLException throwables) {
+        throwables.printStackTrace();
+        response.getWriter().write("Doesn't work");
+        response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+      }
+    } else if (type.equals(SKIER_TYPE)) {
+      if (urlParts.length == 5) {
+        try {
+          int vertical = SkierDBReader.getVertical(Integer.parseInt(urlParts[3]));
+          response.getWriter().write("Vertical " + vertical);
+          response.setStatus(HttpServletResponse.SC_OK);
+        } catch (SQLException throwables) {
+          throwables.printStackTrace();
+          response.getWriter().write("Doesn't work");
+          response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+        }
+      } else if (urlParts.length == 10) {
+        int resortId = URLVerifier.getResortId(urlParts);
+        int seasonId = URLVerifier.getSeasonId(urlParts);
+        int dayId = URLVerifier.getDayId(urlParts);
+        int skierId = URLVerifier.getSkierId(urlParts);
+        try {
+          int numLiftRides = SkierDBReader.getNumLiftRides(resortId, seasonId, dayId, skierId);
+          response.getWriter().write("Number of lift rides " + numLiftRides);
+          response.setStatus(HttpServletResponse.SC_OK);
+        } catch (SQLException throwables) {
+          throwables.printStackTrace();
+          response.getWriter().write("Doesn't work");
+          response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+        }
+      }
+
+      response.getWriter().write("Invalid request");
       response.setStatus(HttpServletResponse.SC_NOT_FOUND);
     }
   }
@@ -66,6 +114,8 @@ public class SkierServlet extends HttpServlet {
     if (URLVerifier.isValidURL(urlParts)) {
       // put message to rabbitMQ by calling sender
       String type = URLVerifier.getType(urlParts);
+
+      // send skier messages
       if (type.equals(SKIER_TYPE)) {
         try {
           SkierMessageSender.sendAMessage(liftRide);
@@ -74,6 +124,7 @@ public class SkierServlet extends HttpServlet {
         }
       }
 
+      // send resort messages
       if (type.equals(RESORT_TYPE)) {
         try {
           ResortMessageSender.sendAMessage(liftRide);

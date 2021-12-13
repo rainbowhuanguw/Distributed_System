@@ -14,8 +14,8 @@ import java.util.concurrent.TimeoutException;
  */
 public class ResortMessageSender {
 
-  private static final String HOST_NAME = "172.31.82.248"; // private rabbitMQ address
-  //private static final String HOST_NAME = "localhost";
+  //private static final String HOST_NAME = "172.31.82.248"; // private rabbitMQ address
+  private static final String HOST_NAME = "localhost";
   private static final String QUEUE_NAME = "resortQueue";
   private static final String EXCHANGE_NAME = "resort-exchange";
   private static final String EXCHANGE_TYPE = "direct";
@@ -23,18 +23,19 @@ public class ResortMessageSender {
   private static final String USER_NAME = "rainbow"; // rabbitmq user name
   private static final String PASSWORD = "123456";   // rabbitmq password
   private static final int PORT_NUMBER = 5672;
+  private static final int TIME_OUT = 0;
 
   private static ConnectionFactory factory = null;
   private static Connection connection = null;
 
   private static void setup() throws IOException, TimeoutException {
     if (factory == null) {
-      // connects to the server
       factory = new ConnectionFactory();
       factory.setHost(HOST_NAME);
       factory.setPort(PORT_NUMBER);
-      factory.setUsername(USER_NAME);
-      factory.setPassword(PASSWORD);
+      //factory.setUsername(USER_NAME);
+      //factory.setPassword(PASSWORD);
+      factory.setRequestedHeartbeat(TIME_OUT);
     }
 
     if (connection == null) {
@@ -56,7 +57,7 @@ public class ResortMessageSender {
 
       // create a channel after connection is established
       // sends one message once
-      channel.basicQos(1); // limit the number of unacknowledged messages to 1
+      channel.basicQos(20); // prefetch value
 
       String message = input.toString();
       channel.basicPublish(EXCHANGE_NAME, "", null,

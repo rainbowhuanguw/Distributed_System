@@ -9,12 +9,13 @@ import com.rabbitmq.client.ConnectionFactory;
  */
 public class ResortConsumer {
 
-  private static final String HOST_NAME = "3.92.133.65"; // public rabbitmq address
-  //private static final String HOST_NAME = "localhost";
+  //private static final String HOST_NAME = "3.92.133.65"; // public rabbitmq address
+  private static final String HOST_NAME = "localhost";
   private static final int PORT_NUMBER = 5672;
   private static final String USER_NAME = "rainbow"; // remote rabbitmq user name
   private static final String PASSWORD = "123456"; // remote rabbitmq password
-  private static final int NUM_THREADS = 64;
+  private static final int NUM_THREADS = 128;
+  private static final int TIME_OUT = 0;
 
   private static ConnectionFactory factory = null;
   private static Connection connection = null; // threads share one connection
@@ -25,10 +26,11 @@ public class ResortConsumer {
     // creates a factory for connection and channel
     if (factory == null) {
       factory = new ConnectionFactory();
-      factory.setUsername(USER_NAME);
-      factory.setPassword(PASSWORD);
+      //factory.setUsername(USER_NAME);
+      //factory.setPassword(PASSWORD);
       factory.setHost(HOST_NAME);
       factory.setPort(PORT_NUMBER);
+      factory.setRequestedHeartbeat(TIME_OUT);
     }
 
     if (connection == null) {

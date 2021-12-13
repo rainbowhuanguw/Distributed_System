@@ -39,4 +39,21 @@ public class URLVerifier {
     return urlParts[2];
   }
 
+  public static String getVertical(String[] urlParts) { return urlParts[4]; }
+
+  public static int getResortId(String[] urlParts) {
+    return Integer.parseInt(urlParts[3]);
+  }
+
+  public static int getSeasonId(String[] urlParts) {
+    return Integer.parseInt(urlParts[5]);
+  }
+
+  public static int getDayId(String[] urlParts) {
+    return Integer.parseInt(urlParts[7]);
+  }
+
+  public static int getSkierId(String[] urlParts) {
+    return Integer.parseInt(urlParts[9]);
+  }
 }

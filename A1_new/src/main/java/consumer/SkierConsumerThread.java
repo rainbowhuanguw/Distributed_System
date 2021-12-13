@@ -6,7 +6,7 @@ import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.DefaultConsumer;
 import com.rabbitmq.client.DeliverCallback;
 import com.rabbitmq.client.Envelope;
-import database.SkierDBConnector;
+import database.SkierDBWriter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
@@ -44,7 +44,7 @@ public class SkierConsumerThread extends Thread {
       String message = new String(deliver.getBody(), StandardCharsets.UTF_8);
       //System.out.println("[x] Received '" + message + "'");
       try {
-        SkierDBConnector.write(message);
+        SkierDBWriter.write(message);
       } catch (SQLException throwables) {
         throwables.printStackTrace();
       }

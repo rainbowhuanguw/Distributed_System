@@ -14,8 +14,8 @@ import java.util.concurrent.TimeoutException;
  */
 public class SkierMessageSender {
 
-  private static final String HOST_NAME = "172.31.82.248"; // private rabbitMQ address
-  //private static final String HOST_NAME = "localhost";
+  //private static final String HOST_NAME = "172.31.82.248"; // private rabbitMQ address
+  private static final String HOST_NAME = "localhost";
   private static final String QUEUE_NAME = "skierQueue";
   private static final String EXCHANGE_NAME = "skier-exchange";
   private static final String EXCHANGE_TYPE = "direct";
@@ -29,12 +29,11 @@ public class SkierMessageSender {
 
   private static void setup() throws IOException, TimeoutException {
     if (factory == null) {
-      // connects to the server
       factory = new ConnectionFactory();
       factory.setHost(HOST_NAME);
       factory.setPort(PORT_NUMBER);
-      factory.setUsername(USER_NAME);
-      factory.setPassword(PASSWORD);
+      //factory.setUsername(USER_NAME);
+      //factory.setPassword(PASSWORD);
     }
 
     if (connection == null) {
