@@ -44,7 +44,8 @@ public class SkierConsumerThread extends Thread {
       String message = new String(deliver.getBody(), StandardCharsets.UTF_8);
       //System.out.println("[x] Received '" + message + "'");
       try {
-        SkierDBWriter.write(message);
+        SkierDBWriter writer = new SkierDBWriter();
+        writer.write(message);
       } catch (SQLException throwables) {
         throwables.printStackTrace();
       }

@@ -16,8 +16,8 @@ public class SkierDBWriter {
       "jdbc:mysql://localhost:3306/" +
       //"jdbc:mysql://database-1.citnt9myvbnx.us-east-1.rds.amazonaws.com:3306/" +
       DB_NAME + "?createDatabaseIfNotExist=true";
-  private static final String USERNAME = "admin";
-  private static final String PASSWORD = "12345678";
+  private static final String USERNAME = "admin"; //"root";
+  private static final String PASSWORD = "12345678"; //"";
   private static final String MAX_POOL = "100";
   private static final String DELIM = ",";
 
@@ -36,11 +36,32 @@ public class SkierDBWriter {
   private static Properties properties = null;
   private static Connection connection = null;
 
+  public SkierDBWriter() {
+    connect();
+  }
+
+  /**
+   * Connect to database
+   */
+  private void connect() {
+    if (connection == null) {
+      try {
+        Class.forName(DATABASE_DRIVER);
+        // connect and create database if not exists
+        connection = DriverManager.getConnection(DATABASE_URL, getProperties());
+      } catch (ClassNotFoundException | SQLException e) {
+        e.printStackTrace();
+      }
+
+      createTable();
+    }
+  }
+
   private static Properties getProperties() {
     if (properties == null) {
       properties = new Properties();
-      //properties.setProperty("user", USERNAME);
-      //properties.setProperty("password", PASSWORD);
+      properties.setProperty("user", USERNAME);
+      properties.setProperty("password", PASSWORD);
       properties.setProperty("MaxPooledStatements", MAX_POOL);
     }
     return properties;
@@ -49,8 +70,7 @@ public class SkierDBWriter {
   /**
    * write to database
    */
-  public static void write(String message) throws SQLException {
-    connect();
+  public void write(String message) throws SQLException {
 
     // insert data using prepared statement
     PreparedStatement statement = connection.prepareStatement(
@@ -79,7 +99,7 @@ public class SkierDBWriter {
   /**
    * Create default table
    */
-  private static void createTable() {
+  private void createTable() {
     if (connection == null) return;
 
     try (Statement statement = connection.createStatement()) {
@@ -97,23 +117,6 @@ public class SkierDBWriter {
       System.out.println("table created");
     } catch (SQLException e) {
       e.printStackTrace();
-    }
-  }
-
-  /**
-   * Connect to database
-   */
-  private static void connect() {
-    if (connection == null) {
-      try {
-        Class.forName(DATABASE_DRIVER);
-        // connect and create database if not exists
-        connection = DriverManager.getConnection(DATABASE_URL, getProperties());
-      } catch (ClassNotFoundException | SQLException e) {
-        e.printStackTrace();
-      }
-
-      createTable();
     }
   }
 }

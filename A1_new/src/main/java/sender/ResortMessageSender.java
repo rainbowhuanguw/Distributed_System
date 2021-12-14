@@ -48,7 +48,7 @@ public class ResortMessageSender {
     setup();
 
     try (Channel channel = connection.createChannel()) {
-      // fanout exchange
+      // direct exchange
       channel.exchangeDeclare(EXCHANGE_NAME, EXCHANGE_TYPE);
 
       // bind skier queue and exchange

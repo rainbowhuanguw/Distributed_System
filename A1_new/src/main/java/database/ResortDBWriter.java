@@ -15,13 +15,15 @@ import java.util.Properties;
   */
 public class ResortDBWriter {
   private static final String DATABASE_DRIVER = "com.mysql.cj.jdbc.Driver";
-  private static final String DB_NAME = "resorts";
+  private static final String DB_NAME = "resort"; // zhe's
+      // "resorts"; // my db
   private static final String DATABASE_URL =
-      "jdbc:mysql://localhost:3306/" + // local db
+      //"jdbc:mysql://localhost:3306/" + // local db
       //"jdbc:mysql://database-2.citnt9myvbnx.us-east-1.rds.amazonaws.com:3306/" + // remote db
-      DB_NAME + "?createDatabaseIfNotExist=true";
-  private static final String USERNAME = "admin";
-  private static final String PASSWORD = "12345678";
+      "jdbc:mysql://database-3.cnm5oojpbws5.us-east-1.rds.amazonaws.com" + // zhe's
+          DB_NAME + "?createDatabaseIfNotExist=true";
+  private static final String USERNAME = "admin"; //"root"; //
+  private static final String PASSWORD =  "12345678"; //""; //
   private static final String MAX_POOL = "100";
   private static final String DELIM = ",";
 
@@ -40,20 +42,40 @@ public class ResortDBWriter {
   private static Properties properties = null;
   private static Connection connection = null;
 
+  public ResortDBWriter() {
+    connect();
+  }
+
   private static Properties getProperties() {
     if (properties == null) {
       properties = new Properties();
-      //properties.setProperty("user", USERNAME);
-      //properties.setProperty("password", PASSWORD);
+      properties.setProperty("user", USERNAME);
+      properties.setProperty("password", PASSWORD);
       properties.setProperty("MaxPooledStatements", MAX_POOL);
     }
     return properties;
   }
 
   /**
+   * Connect to database
+   */
+  private void connect() {
+    if (connection == null) {
+      try {
+        Class.forName(DATABASE_DRIVER);
+        // connect and create database if not exists
+        connection = DriverManager.getConnection(DATABASE_URL, getProperties());
+      } catch (ClassNotFoundException | SQLException e) {
+        e.printStackTrace();
+      }
+
+      createTable();
+    }
+  }
+  /**
    * write to database
    */
-  public static void write(String message) throws SQLException {
+  public void write(String message) throws SQLException {
     connect();
 
     String[] split = message.split(DELIM);
@@ -80,7 +102,7 @@ public class ResortDBWriter {
   /**
    * Create default table
    */
-  private static void createTable() {
+  private void createTable() {
     if (connection == null) return;
 
     try (Statement statement = connection.createStatement()) {
@@ -101,20 +123,5 @@ public class ResortDBWriter {
     }
   }
 
-  /**
-   * Connect to database
-   */
-  private static void connect() {
-    if (connection == null) {
-      try {
-        Class.forName(DATABASE_DRIVER);
-        // connect and create database if not exists
-        connection = DriverManager.getConnection(DATABASE_URL, getProperties());
-      } catch (ClassNotFoundException | SQLException e) {
-        e.printStackTrace();
-      }
 
-      createTable();
-    }
-  }
 }

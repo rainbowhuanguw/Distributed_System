@@ -13,11 +13,13 @@ public class ResortConsumerThread extends Thread {
   private static final String QUEUE_NAME = "resortQueue";
 
   private static Channel channel;
+  private final ResortDBWriter writer;
 
   public ResortConsumerThread(Connection connection)
       throws Exception {
     // set up channel
     channel = connection.createChannel();
+    writer = new ResortDBWriter();
   }
 
   @Override
@@ -37,9 +39,9 @@ public class ResortConsumerThread extends Thread {
       String message = new String(delivery.getBody(), "UTF-8");
 
       try {
+        writer.write(message);
         // positively acknowledge a single delivery, the message will be discarded
         channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
-        ResortDBWriter.write(message);
 
       } catch (SQLException throwables) {
         throwables.printStackTrace();
